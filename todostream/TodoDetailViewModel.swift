@@ -4,3 +4,7 @@
 //
 
 import Foundation
+
+struct TodoDetailViewModel {
+    
+}

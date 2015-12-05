@@ -7,9 +7,20 @@ import Foundation
 import Result
 
 enum Event {
-    case ReqReadTodos
-    case ReqWriteTodo(Todo)
     
+    // Model
+    case ReqReadTodos
     case ResTodos(Result<[Todo], NSError>)
+
+    case ReqWriteTodo(Todo)    
     case ResTodo(Result<Todo, NSError>)
+    
+    // ViewModel
+    case ReqTodoViewModels
+    case ResTodoViewModels(Result<[TodoViewModel], NSError>)
+    
+    case ResTodoViewModel(Result<TodoViewModel, NSError>)
+    
+//    case ReqTodoDetailViewModel(TodoViewModel)
+//    case ResTodoDetailViewModel(Result<TodoDetailViewModel, NSError>)
 }
