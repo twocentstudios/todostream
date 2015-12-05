@@ -20,6 +20,7 @@ struct TodoListViewModel {
                 }
             }
             .map { _ in Event.ReqReadTodos }
+            .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
         /// .ResTodos
@@ -39,6 +40,7 @@ struct TodoListViewModel {
                     .mapError { _ in NSError.app() } // TODO: map model error to view model error
             }
             .map { Event.ResTodoViewModels($0) }
+            .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
         /// .ResTodo
@@ -56,6 +58,7 @@ struct TodoListViewModel {
                     .mapError { _ in NSError.app() } // TODO: map model error to view model error
             }
             .map { Event.ResTodoViewModel($0) }
+            .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
         /// .ReqAddRandomTodoViewModel
@@ -71,6 +74,7 @@ struct TodoListViewModel {
                 todo.title = todo.id.UUIDString
                 return Event.ReqWriteTodo(todo)
             }
+            .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
     }
 }

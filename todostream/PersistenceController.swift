@@ -43,6 +43,7 @@ struct PersistenceController {
             }
             .map { _ in self.database.map { $0.objects(TodoObject).decodeResults() }.mapError { _ in NSError.app() } }
             .map { Event.ResTodos($0) }
+            .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
         /// .ReqWriteTodo
@@ -63,6 +64,7 @@ struct PersistenceController {
                     .mapError { _ in NSError.app() }
             }
             .map { Event.ResTodo($0) }
+            .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
     }
 }
