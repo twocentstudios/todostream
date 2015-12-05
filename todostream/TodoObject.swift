@@ -21,11 +21,11 @@ final class TodoObject: Object {
 extension Todo: RealmEncodable {
     var realmObject: TodoObject {
         let object = TodoObject()
-        object.id = self.id
+        object.id = self.id.UUIDString
         object.title = self.title
         object.subtitle = self.subtitle
         object.favorited = self.favorited
-        object.priority = self.priority
+        object.priority = self.priority.rawValue
         return object
     }
 }
@@ -33,11 +33,11 @@ extension Todo: RealmEncodable {
 extension TodoObject: RealmDecodable {
     var domainObject: Todo {
         return Todo(
-            id: self.id!,
+            id: NSUUID(UUIDString: self.id!)!,
             title: self.title!,
             subtitle: self.subtitle!,
             favorited: self.favorited,
-            priority: TodoPriority(rawValue: self.priority!)!,
+            priority: TodoPriority(rawValue: self.priority!)!
         )
     }
 }
