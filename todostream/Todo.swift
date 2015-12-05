@@ -33,3 +33,11 @@ enum TodoPriority: String {
 }
 
 
+extension Todo: Equatable {}
+func ==(lhs: Todo, rhs: Todo) -> Bool {
+    return lhs.id == rhs.id &&
+        lhs.title == rhs.title &&
+        lhs.subtitle == rhs.subtitle &&
+        lhs.favorited == rhs.favorited &&
+        lhs.priority == rhs.priority
+}
