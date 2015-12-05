@@ -9,7 +9,7 @@ struct Todo {
     let id: NSUUID
     var title: String = ""
     var subtitle: String = ""
-    var favorited: Bool = false
+    var complete: Bool = false
     var priority: TodoPriority = .Normal
 
     // New
@@ -18,11 +18,11 @@ struct Todo {
     }
     
     // Decoded
-    init(id: NSUUID, title: String, subtitle: String, favorited: Bool, priority: TodoPriority) {
+    init(id: NSUUID, title: String, subtitle: String, complete: Bool, priority: TodoPriority) {
         self.id = id
         self.title = title
         self.subtitle = subtitle
-        self.favorited = favorited
+        self.complete = complete
         self.priority = priority
     }
 }
@@ -38,6 +38,6 @@ func ==(lhs: Todo, rhs: Todo) -> Bool {
     return lhs.id == rhs.id &&
         lhs.title == rhs.title &&
         lhs.subtitle == rhs.subtitle &&
-        lhs.favorited == rhs.favorited &&
+        lhs.complete == rhs.complete &&
         lhs.priority == rhs.priority
 }

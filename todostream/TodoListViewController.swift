@@ -121,6 +121,8 @@ final class TodoCell: UITableViewCell {
         didSet {
             self.textLabel?.text = viewModel?.title ?? ""
             self.detailTextLabel?.text = viewModel?.subtitle ?? ""
+            
+            self.accessoryType = viewModel.map { $0.complete ? .Checkmark : .None } ?? .None
         }
     }
     

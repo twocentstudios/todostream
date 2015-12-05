@@ -66,15 +66,16 @@ struct TodoViewModel {
     
     let title: String
     let subtitle: String
+    let complete: Bool
     
     init(todo: Todo) {
         self.todo = todo
         
-        let favorite = todo.favorited ? "✭" : "✩"
         let priority = todo.priority.rawValue.uppercaseString
         
         self.title = todo.title
-        self.subtitle = "\(favorite) - \(priority)"
+        self.subtitle = "Priority: \(priority)"
+        self.complete = todo.complete
     }
 }
 

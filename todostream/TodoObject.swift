@@ -10,7 +10,7 @@ final class TodoObject: Object {
     dynamic var id: String?
     dynamic var title: String?
     dynamic var subtitle: String?
-    dynamic var favorited: Bool = false
+    dynamic var complete: Bool = false
     dynamic var priority: String?
     
     override static func primaryKey() -> String? {
@@ -24,7 +24,7 @@ extension Todo: RealmEncodable {
         object.id = self.id.UUIDString
         object.title = self.title
         object.subtitle = self.subtitle
-        object.favorited = self.favorited
+        object.complete = self.complete
         object.priority = self.priority.rawValue
         return object
     }
@@ -36,7 +36,7 @@ extension TodoObject: RealmDecodable {
             id: NSUUID(UUIDString: self.id!)!,
             title: self.title!,
             subtitle: self.subtitle!,
-            favorited: self.favorited,
+            complete: self.complete,
             priority: TodoPriority(rawValue: self.priority!)!
         )
     }
