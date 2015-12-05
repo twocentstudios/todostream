@@ -1,0 +1,30 @@
+PODS:
+  - ReactiveCocoa (4.0.4-alpha-4):
+    - ReactiveCocoa/UI (= 4.0.4-alpha-4)
+    - Result (~> 1.0)
+  - ReactiveCocoa/Core (4.0.4-alpha-4):
+    - ReactiveCocoa/no-arc
+    - Result (~> 1.0)
+  - ReactiveCocoa/no-arc (4.0.4-alpha-4):
+    - Result (~> 1.0)
+  - ReactiveCocoa/UI (4.0.4-alpha-4):
+    - ReactiveCocoa/Core
+    - Result (~> 1.0)
+  - Realm (0.96.3):
+    - Realm/Headers (= 0.96.3)
+  - Realm/Headers (0.96.3)
+  - RealmSwift (0.96.3):
+    - Realm (= 0.96.3)
+  - Result (1.0.0)
+
+DEPENDENCIES:
+  - ReactiveCocoa (= 4.0.4-alpha-4)
+  - RealmSwift (= 0.96.3)
+
+SPEC CHECKSUMS:
+  ReactiveCocoa: e459ea92099447802df20c4735e31e8139b06094
+  Realm: 145d3cdf78a03aee71bde5381ad7e542bd541720
+  RealmSwift: aab84968aad662f61f36473d1aea019f63481505
+  Result: feaaff535eb59c414c6c7f95e6145ab991b1b07f
+
+COCOAPODS: 0.39.0
