@@ -4,16 +4,28 @@
 //
 
 import UIKit
+import RealmSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    var appContext: AppContext!
+    var persistenceController: PersistenceController!
+    var todoListViewModel: TodoListViewModel!
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        
+        self.appContext = AppContext()
+        self.persistenceController = PersistenceController(configuration: Realm.Configuration.defaultConfiguration, appContext: appContext)
+        self.todoListViewModel = TodoListViewModel(appContext: appContext)
+        
+        let todoListViewController = TodoListViewController(appContext: appContext)
+        let navigationController = UINavigationController(rootViewController: todoListViewController)
+        
         self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
-        self.window?.rootViewController = UIViewController()
+        self.window?.rootViewController = navigationController
         self.window?.makeKeyAndVisible()
         
         return true

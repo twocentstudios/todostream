@@ -57,7 +57,21 @@ struct TodoListViewModel {
             }
             .map { Event.ResTodoViewModel($0) }
             .observe(appContext.eventsObserver)
-
+        
+        /// .ReqAddRandomTodoViewModel
+        appContext.eventsSignal
+            .filter { event -> Bool in
+                switch event {
+                case .ReqAddRandomTodoViewModel: return true
+                default: return false
+                }
+            }
+            .map { _ in
+                var todo = Todo()
+                todo.title = todo.id.UUIDString
+                return Event.ReqWriteTodo(todo)
+            }
+            .observe(appContext.eventsObserver)
     }
 }
 

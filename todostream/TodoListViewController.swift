@@ -83,7 +83,7 @@ final class TodoListViewController: UITableViewController {
     }
     
     func doAdd() {
-        
+        appContext.eventsObserver.sendNext(Event.ReqAddRandomTodoViewModel)
     }
     
     // MARK: - UITableViewDataSource

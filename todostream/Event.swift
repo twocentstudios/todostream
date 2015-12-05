@@ -21,6 +21,8 @@ enum Event {
     
     case ResTodoViewModel(Result<TodoViewModel, NSError>)
     
+    case ReqAddRandomTodoViewModel
+    
 //    case ReqTodoDetailViewModel(TodoViewModel)
 //    case ResTodoDetailViewModel(Result<TodoDetailViewModel, NSError>)
 }

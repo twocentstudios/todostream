@@ -8,4 +8,8 @@ import ReactiveCocoa
 
 struct AppContext {
     let (eventsSignal, eventsObserver) = Signal<Event, NoError>.pipe()
+    
+    init() {
+        
+    }
 }
