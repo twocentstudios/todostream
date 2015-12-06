@@ -67,7 +67,7 @@ struct TodoDetailViewModel {
     }
     
     func validate() -> Result<TodoDetailViewModel, NSError> {
-        if (self.title == "") { return Result(error: NSError.app()) } // e.g. title can't be empty
+        if (self.title == "") { return Result(error: NSError.app("Please add a title.")) }
         
         return Result(value: self)
     }

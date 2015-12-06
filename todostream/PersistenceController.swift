@@ -18,15 +18,10 @@ protocol RealmDecodable {
     var domainObject: DomainObjectType { get }
 }
 
-enum PersistenceError: ErrorType {
-    case UnknownError
-    case RealmError(NSError)
-}
-
 final class PersistenceController {
     let configuration: Realm.Configuration
     
-    var database: Result<Realm, PersistenceError> {
+    var database: Result<Realm, NSError> {
         return Realm.result(configuration)
     }
     
@@ -36,7 +31,7 @@ final class PersistenceController {
         /// .RequestReadTodos
         appContext.eventsSignal
             .filter { if case .RequestReadTodos = $0 { return true }; return false }
-            .map { _ in self.database.map { $0.objects(TodoObject).sorted("createdAt", ascending: false).decodeResults() }.mapError { _ in NSError.app() } }
+            .map { _ in self.database.map { $0.objects(TodoObject).sorted("createdAt", ascending: false).decodeResults() }.mapError { $0 } }
             .map { Event.ResponseTodos($0) }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
@@ -51,7 +46,7 @@ final class PersistenceController {
                     .flatMap { realm in
                         realm.writeObject(todoObject).map { $0.domainObject }
                     }
-                    .mapError { _ in NSError.app() }
+                    .mapError { $0 }
             }
             .map { Event.ResponseTodo($0) }
             .observeOn(appContext.scheduler)
@@ -60,23 +55,23 @@ final class PersistenceController {
 }
 
 extension Realm {
-    static func result(configuration: Configuration) -> Result<Realm, PersistenceError> {
+    static func result(configuration: Configuration) -> Result<Realm, NSError> {
         do {
             let realm = try Realm(configuration: configuration)
             return Result(value: realm)
         } catch let error as NSError {
-            return Result(error: .RealmError(error))
+            return Result(error: error)
         }
     }
     
-    func writeObject<T: Object>(object: T) -> Result<T, PersistenceError> {
+    func writeObject<T: Object>(object: T) -> Result<T, NSError> {
         do {
             try self.write {
                 self.add(object, update: true)
             }
             return Result(value: object)
         } catch let error as NSError {
-            return Result(error: .RealmError(error))
+            return Result(error: error)
         }
     }
 }

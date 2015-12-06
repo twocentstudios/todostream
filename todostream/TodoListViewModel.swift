@@ -31,7 +31,7 @@ final class TodoListViewModel {
                             .filter { !$0.deleted }
                             .map { (todo: Todo) -> TodoViewModel in TodoViewModel(todo: todo) }
                     }
-                    .mapError { _ in NSError.app() } // TODO: map model error to view model error
+                    .mapError { $0 } // TODO: map model error to view model error
             }
             .map { Event.ResponseTodoViewModels($0) }
             .observeOn(appContext.scheduler)
@@ -45,7 +45,7 @@ final class TodoListViewModel {
             .map { result -> Result<TodoViewModel, NSError> in
                 return result
                     .map { todo in TodoViewModel(todo: todo) }
-                    .mapError { _ in NSError.app() } // TODO: map model error to view model error
+                    .mapError { $0 } // TODO: map model error to view model error
             }
             .map { Event.ResponseTodoViewModel($0) }
             .observeOn(appContext.scheduler)

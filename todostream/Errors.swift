@@ -6,7 +6,8 @@
 import Foundation
 
 extension NSError {
-    static func app() -> NSError {
-        return NSError(domain: "com.twocentstudios.todostream", code: 0, userInfo: [NSLocalizedDescriptionKey : "An error occurred."])
+    static func app(message: String? = nil) -> NSError {
+        let defaultMessage = "An error occurred."
+        return NSError(domain: "com.twocentstudios.todostream", code: 0, userInfo: [NSLocalizedDescriptionKey : message ?? defaultMessage])
     }
 }
