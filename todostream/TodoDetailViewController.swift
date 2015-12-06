@@ -131,8 +131,8 @@ final class TodoDetailViewController: UITableViewController {
         switch indexPath.section {
         case 0:
             let alertController = UIAlertController(title: "Update title", message: nil, preferredStyle: .Alert)
-            alertController.addTextFieldWithConfigurationHandler { $0.text = self.viewModel.title }
-            alertController.addAction(UIAlertAction(title: "Update", style: UIAlertActionStyle.Default) { _ in
+            alertController.addTextFieldWithConfigurationHandler { [unowned self] in $0.text = self.viewModel.title }
+            alertController.addAction(UIAlertAction(title: "Update", style: UIAlertActionStyle.Default) { [unowned self] _ in
                 if let newText = alertController.textFields?.first?.text { self.viewModel.title = newText }
                 self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
             })
@@ -140,8 +140,8 @@ final class TodoDetailViewController: UITableViewController {
             self.presentViewController(alertController, animated: true, completion: nil)
         case 1:
             let alertController = UIAlertController(title: "Update subtitle", message: nil, preferredStyle: .Alert)
-            alertController.addTextFieldWithConfigurationHandler { $0.text = self.viewModel.subtitle }
-            alertController.addAction(UIAlertAction(title: "Update", style: UIAlertActionStyle.Default) { _ in
+            alertController.addTextFieldWithConfigurationHandler { [unowned self] in $0.text = self.viewModel.subtitle }
+            alertController.addAction(UIAlertAction(title: "Update", style: UIAlertActionStyle.Default) { [unowned self] _ in
                 if let newText = alertController.textFields?.first?.text { self.viewModel.subtitle = newText }
                 self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Fade)
             })
