@@ -13,29 +13,20 @@ struct TodoListViewModel {
         
         /// .RequestTodoViewModels
         appContext.eventsSignal
-            .filter { event -> Bool in
-                switch event {
-                case .RequestTodoViewModels: return true
-                default: return false
-                }
-            }
+            .filter { if case .RequestTodoViewModels = $0 { return true }; return false }
             .map { _ in Event.RequestReadTodos }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
         /// .ResponseTodos
         appContext.eventsSignal
-            .map { event -> Result<[Todo], NSError>? in
-                switch event {
-                case .ResponseTodos(let result): return result
-                default: return nil
-                }
-            }
+            .map { event -> Result<[Todo], NSError>? in if case let .ResponseTodos(result) = event { return result }; return nil }
             .ignoreNil()
             .map { result -> Result<[TodoViewModel], NSError> in
                 return result
                     .map { todos in
-                        todos.map { (todo: Todo) -> TodoViewModel in TodoViewModel(todo: todo) }
+                        todos
+                            .map { (todo: Todo) -> TodoViewModel in TodoViewModel(todo: todo) }
                     }
                     .mapError { _ in NSError.app() } // TODO: map model error to view model error
             }
@@ -45,12 +36,7 @@ struct TodoListViewModel {
         
         /// .ResponseTodo
         appContext.eventsSignal
-            .map { event -> Result<Todo, NSError>? in
-                switch event {
-                case .ResponseTodo(let result): return result
-                default: return nil
-                }
-            }
+            .map { event -> Result<Todo, NSError>? in if case let .ResponseTodo(result) = event { return result }; return nil }
             .ignoreNil()
             .map { result -> Result<TodoViewModel, NSError> in
                 return result
@@ -63,12 +49,7 @@ struct TodoListViewModel {
         
         /// .RequestAddRandomTodoViewModel
         appContext.eventsSignal
-            .filter { event -> Bool in
-                switch event {
-                case .RequestAddRandomTodoViewModel: return true
-                default: return false
-                }
-            }
+            .filter { if case .RequestAddRandomTodoViewModel = $0 { return true }; return false }
             .map { _ in
                 var todo = Todo()
                 todo.title = todo.id.UUIDString
@@ -85,6 +66,7 @@ struct TodoViewModel {
     let title: String
     let subtitle: String
     let complete: Bool
+    let deleted: Bool
     
     init(todo: Todo) {
         self.todo = todo
@@ -94,6 +76,7 @@ struct TodoViewModel {
         self.title = todo.title
         self.subtitle = "Priority: \(priority)"
         self.complete = todo.complete
+        self.deleted = todo.deleted
     }
 }
 
