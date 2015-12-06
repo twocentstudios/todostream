@@ -36,7 +36,7 @@ struct PersistenceController {
         /// .RequestReadTodos
         appContext.eventsSignal
             .filter { if case .RequestReadTodos = $0 { return true }; return false }
-            .map { _ in self.database.map { $0.objects(TodoObject).decodeResults() }.mapError { _ in NSError.app() } }
+            .map { _ in self.database.map { $0.objects(TodoObject).sorted("createdAt", ascending: false).decodeResults() }.mapError { _ in NSError.app() } }
             .map { Event.ResponseTodos($0) }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
