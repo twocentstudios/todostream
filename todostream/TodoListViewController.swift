@@ -38,9 +38,13 @@ final class TodoListViewController: UITableViewController {
         appContext.eventsSignal
             .map { event -> Result<[TodoViewModel], NSError>? in if case let .ResponseTodoViewModels(result) = event { return result }; return nil }
             .ignoreNil()
-            .map { $0.value }
-            .ignoreNil()
+            .promoteErrors(NSError)
+            .attemptMap { $0 }
             .observeOn(UIScheduler())
+            .flatMapError { [unowned self] error -> SignalProducer<[TodoViewModel], NoError> in
+                self.presentError(error)
+                return .empty
+            }
             .observeNext { [unowned self] todoViewModels in
                 if (self.viewModels == todoViewModels) { return }
                 self.viewModels = todoViewModels
@@ -50,9 +54,13 @@ final class TodoListViewController: UITableViewController {
         appContext.eventsSignal
             .map { event -> Result<TodoViewModel, NSError>? in if case let .ResponseTodoViewModel(result) = event { return result }; return nil }
             .ignoreNil()
-            .map { $0.value }
-            .ignoreNil()
+            .promoteErrors(NSError)
+            .attemptMap { $0 }
             .observeOn(UIScheduler())
+            .flatMapError { [unowned self] error -> SignalProducer<TodoViewModel, NoError> in
+                self.presentError(error)
+                return .empty
+            }
             .observeNext { [unowned self] todoViewModel in
                 if let index = self.viewModels.indexOf(todoViewModel) {
                     if (todoViewModel.deleted) {
@@ -79,6 +87,12 @@ final class TodoListViewController: UITableViewController {
     
     func doAdd() {
         appContext.eventsObserver.sendNext(Event.RequestAddRandomTodoViewModel)
+    }
+    
+    func presentError(error: NSError) {
+        let alertController = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .Alert)
+        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Cancel) { _ in self.dismissViewControllerAnimated(true, completion: nil) })
+        self.presentViewController(alertController, animated: true, completion: nil)
     }
     
     // MARK: - UITableViewDataSource
