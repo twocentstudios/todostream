@@ -101,11 +101,21 @@ final class TodoListViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let todoViewModel = viewModels[indexPath.row]
-        appContext.eventsObserver.sendNext(Event.RequestDeleteTodoViewModel(todoViewModel))
+        print(todoViewModel)
         
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
+    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        if (editingStyle != .Delete) { return }
+        
+        let todoViewModel = viewModels[indexPath.row]
+        appContext.eventsObserver.sendNext(Event.RequestDeleteTodoViewModel(todoViewModel))
+    }
 }
 
 final class TodoCell: UITableViewCell {
