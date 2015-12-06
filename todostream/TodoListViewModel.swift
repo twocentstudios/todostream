@@ -51,12 +51,14 @@ final class TodoListViewModel {
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
-        /// .RequestAddRandomTodoViewModel
-        disposables += appContext.eventsSignal
-            .filter { if case .RequestAddRandomTodoViewModel = $0 { return true }; return false }
-            .map { _ in
-                var todo = Todo()
-                todo.title = todo.id.UUIDString
+        /// .RequestToggleCompleteTodoViewModel
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
+            .map { event -> TodoViewModel? in if case let .RequestToggleCompleteTodoViewModel(todoViewModel) = event { return todoViewModel }; return nil }
+            .ignoreNil()
+            .map {
+                var todo = $0.todo
+                todo.completedAt = todo.complete ? nil : NSDate()
                 return Event.RequestWriteTodo(todo)
             }
             .observeOn(appContext.scheduler)
@@ -143,6 +145,10 @@ struct TodoViewModel {
     let complete: Bool
     let deleted: Bool
     
+    var completeActionTitle: String {
+        return complete ? "Uncomplete" : "Complete"
+    }
+    
     init(todo: Todo) {
         self.todo = todo
         
@@ -155,7 +161,8 @@ struct TodoViewModel {
     }
 }
 
+// TODO: change this to isEqualIdentity
 extension TodoViewModel: Equatable {}
 func ==(lhs: TodoViewModel, rhs: TodoViewModel) -> Bool {
-    return lhs.todo == rhs.todo
+    return lhs.todo.id == rhs.todo.id
 }

@@ -156,20 +156,21 @@ final class TodoListViewController: UITableViewController {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        return true
-    }
-    
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if (editingStyle != .Delete) { return }
+    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+        let todoViewModel = self.viewModels[indexPath.row]
         
-        let todoViewModel = viewModels[indexPath.row]
-        appContext.eventsObserver.sendNext(Event.RequestDeleteTodoViewModel(todoViewModel))
+        let toggleCompleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: todoViewModel.completeActionTitle) { [unowned self] (action, path) -> Void in
+            let todoViewModel = self.viewModels[path.row]
+            self.appContext.eventsObserver.sendNext(Event.RequestToggleCompleteTodoViewModel(todoViewModel))
+        }
+        
+        let deleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.Destructive, title: "Delete") { [unowned self] (action, path) -> Void in
+            let todoViewModel = self.viewModels[path.row]
+            self.appContext.eventsObserver.sendNext(Event.RequestDeleteTodoViewModel(todoViewModel))
+        }
+        
+        return [deleteAction, toggleCompleteAction]
     }
-    
-//    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-//        return nil
-//    }
 }
 
 final class TodoCell: UITableViewCell {
