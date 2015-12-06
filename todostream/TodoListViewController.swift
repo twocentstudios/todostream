@@ -59,7 +59,7 @@ final class TodoListViewController: UITableViewController {
             .attemptMap { $0 }
             .observeOn(UIScheduler())
             .flatMapError { [unowned self] error -> SignalProducer<TodoViewModel, NoError> in
-                self.presentError(error)
+                self.presentError(error) // TODO: maybe embed error in Todo/TodoViewModel instead?
                 return .empty
             }
             .observeNext { [unowned self] todoViewModel in
@@ -92,7 +92,22 @@ final class TodoListViewController: UITableViewController {
             }
             .observeNext { [unowned self] todoDetailViewModel in
                 let viewController = TodoDetailViewController(viewModel: todoDetailViewModel, appContext: self.appContext)
-                self.presentViewController(viewController, animated: true, completion: nil)
+                let navigationController = UINavigationController(rootViewController: viewController)
+                self.presentViewController(navigationController, animated: true, completion: nil)
+            }
+        
+        /// .ResponseUpdateDetailViewModel
+        appContext.eventsSignal
+            .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseUpdateDetailViewModel(result) = event { return result }; return nil }
+            .ignoreNil()
+            .map { $0.value }
+            .ignoreNil()
+            .observeOn(UIScheduler())
+            .observeNext { [unowned self] detailViewModel in
+                guard let navigationController = self.presentedViewController as? UINavigationController else { return }
+                guard let todoDetailViewController = navigationController.topViewController as? TodoDetailViewController else { return }
+                if (todoDetailViewController.viewModel != detailViewModel) { return }
+                self.dismissViewControllerAnimated(true, completion: nil)
             }
     }
     
@@ -147,6 +162,10 @@ final class TodoListViewController: UITableViewController {
         let todoViewModel = viewModels[indexPath.row]
         appContext.eventsObserver.sendNext(Event.RequestDeleteTodoViewModel(todoViewModel))
     }
+    
+//    override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
+//        return nil
+//    }
 }
 
 final class TodoCell: UITableViewCell {

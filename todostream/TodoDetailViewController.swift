@@ -18,7 +18,7 @@ final class TodoDetailViewController: UITableViewController {
         self.appContext = appContext
         super.init(style: .Grouped)
         
-        self.title = "Todo List"
+        self.title = "Update Item"
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -27,22 +27,41 @@ final class TodoDetailViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .Plain, target: self, action: "doAdd")
+
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: self, action: "doCancel")
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .Plain, target: self, action: "doSave")
         
         tableView.registerClass(TodoDetailCell.self, forCellReuseIdentifier: TodoDetailCell.reuseIdentifier)
-        tableView.rowHeight = 70
+        tableView.rowHeight = 50
         tableView.delegate = self
         tableView.dataSource = self
+        
+        appContext.eventsSignal
+            .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseUpdateDetailViewModel(result) = event { return result }; return nil }
+            .ignoreNil()
+            .map { $0.error }
+            .ignoreNil()
+            .observeOn(UIScheduler())
+            .observeNext { [unowned self] error in
+                self.presentError(error)
+            }
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
     }
     
+    func doCancel() {
+        appContext.eventsObserver.sendNext(Event.ResponseUpdateDetailViewModel(Result(value: viewModel)))
+    }
+    
+    func doSave() {
+        appContext.eventsObserver.sendNext(Event.RequestUpdateDetailViewModel(viewModel))
+    }
+    
     func presentError(error: NSError) {
         let alertController = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .Alert)
-        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Cancel) { _ in self.dismissViewControllerAnimated(true, completion: nil) })
+        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Cancel, handler: nil))
         self.presentViewController(alertController, animated: true, completion: nil)
     }
     
@@ -61,6 +80,17 @@ final class TodoDetailViewController: UITableViewController {
         return cell
     }
     
+    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        switch section {
+        case 0: return "Title"
+        case 1: return "Subtitle"
+        case 2: return "Priority"
+        case 3: return nil
+        case 4: return nil
+        default: return nil
+        }
+    }
+    
     // MARK: - UITableViewDelegate
     
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
@@ -77,16 +107,15 @@ final class TodoDetailViewController: UITableViewController {
             cell.textLabel?.text = viewModel.subtitle
             cell.detailTextLabel?.text = "edit"
         case 2:
-            cell.textLabel?.text = "Priority"
-            cell.textLabel?.textColor = cell.tintColor
-            cell.detailTextLabel?.text = viewModel.priorityString
-            cell.detailTextLabel?.textColor = UIColor.blackColor()
+            cell.textLabel?.text = viewModel.priorityString
+            cell.detailTextLabel?.text = "toggle"
         case 3:
             cell.textLabel?.text = viewModel.completedString
-            cell.textLabel?.textColor = cell.tintColor
+            cell.detailTextLabel?.text = "toggle"
         case 4:
             cell.textLabel?.text = viewModel.deletedString
             cell.textLabel?.textColor = UIColor.redColor()
+            cell.detailTextLabel?.text = "toggle"
         default:
             break
         }

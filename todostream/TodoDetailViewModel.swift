@@ -4,23 +4,35 @@
 //
 
 import Foundation
+import Result
 
 struct TodoDetailViewModel {
     let todo: Todo
     
+    var updatedTodo: Todo {
+        var updatedTodo = todo
+        updatedTodo.title = title
+        updatedTodo.subtitle = subtitle
+        updatedTodo.priority = priority
+        updatedTodo.deleted = deleted
+        updatedTodo.completedAt = completed ? NSDate() : nil
+        return updatedTodo
+    }
+    
+    let propertyCount = 5
     var title: String
     var subtitle: String
     var priority: TodoPriority
     var completed: Bool
     var deleted: Bool
     
-    let propertyCount = 5
+    var shouldSave: Bool = false
     
     var createdAtString: String {
         return "\(String(todo.createdAt.timeIntervalSinceNow)) seconds ago"
     }
     var completedString: String {
-        return completed ? "Uncomplete" : "Complete"
+        return completed ? "Complete" : "Incomplete"
     }
     var priorityString: String {
         return priority.rawValue.uppercaseString
@@ -54,13 +66,19 @@ struct TodoDetailViewModel {
         self.completed = todo.complete
     }
     
-    func updatedModel() -> Todo {
-        var updatedTodo = todo
-        updatedTodo.title = title
-        updatedTodo.subtitle = subtitle
-        updatedTodo.priority = priority
-        updatedTodo.deleted = deleted
-        updatedTodo.completedAt = completed ? NSDate() : nil
-        return updatedTodo
+    func validate() -> Result<TodoDetailViewModel, NSError> {
+        if (self.title == "") { return Result(error: NSError.app()) } // e.g. title can't be empty
+        
+        return Result(value: self)
     }
+}
+
+extension TodoDetailViewModel: Equatable {}
+func ==(lhs: TodoDetailViewModel, rhs: TodoDetailViewModel) -> Bool {
+    return lhs.todo == rhs.todo &&
+        lhs.title == rhs.title &&
+        lhs.subtitle == rhs.subtitle &&
+        lhs.completed == rhs.completed &&
+        lhs.priority == rhs.priority &&
+        lhs.deleted == lhs.deleted
 }

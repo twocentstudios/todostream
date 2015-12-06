@@ -82,6 +82,35 @@ struct TodoListViewModel {
             .map { Event.ResponseTodoDetailViewModel(Result(value: $0)) }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
+        
+        /// .RequestUpdateDetailViewModel
+        appContext.eventsSignal
+            .map { event -> TodoDetailViewModel? in if case let .RequestUpdateDetailViewModel(todoDetailViewModel) = event { return todoDetailViewModel }; return nil }
+            .ignoreNil()
+            .map { $0.validate() }
+            .map { (result: Result<TodoDetailViewModel, NSError>) -> Event in
+                let saveableResult = result.map { (todoDetailViewModel: TodoDetailViewModel) -> TodoDetailViewModel in
+                    var saveableViewModel = todoDetailViewModel
+                    saveableViewModel.shouldSave = true
+                    return saveableViewModel
+                }
+                return Event.ResponseUpdateDetailViewModel(saveableResult)
+            }
+            .observeOn(appContext.scheduler)
+            .observe(appContext.eventsObserver)
+        
+        /// .ResponseUpdateDetailViewModel
+        appContext.eventsSignal
+            .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseUpdateDetailViewModel(result) = event { return result }; return nil }
+            .ignoreNil()
+            .map { $0.value }
+            .ignoreNil()
+            .filter { $0.shouldSave }
+            .map {
+                return Event.RequestWriteTodo($0.updatedTodo)
+            }
+            .observeOn(appContext.scheduler)
+            .observe(appContext.eventsObserver)
     }
 }
 
