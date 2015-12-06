@@ -34,7 +34,7 @@ final class TodoListViewController: UITableViewController {
         tableView.delegate = self
         tableView.dataSource = self
 
-        /// .ResTodos
+        /// .ResponseTodoViewModels
         appContext.eventsSignal
             .map { event -> Result<[TodoViewModel], NSError>? in if case let .ResponseTodoViewModels(result) = event { return result }; return nil }
             .ignoreNil()
@@ -51,6 +51,7 @@ final class TodoListViewController: UITableViewController {
                 self.tableView.reloadData()
             }
         
+        /// .ResponseTodoViewModel
         appContext.eventsSignal
             .map { event -> Result<TodoViewModel, NSError>? in if case let .ResponseTodoViewModel(result) = event { return result }; return nil }
             .ignoreNil()
@@ -77,6 +78,22 @@ final class TodoListViewController: UITableViewController {
                     self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Top)
                 }
             }
+        
+        /// .ResponseDetailViewModel
+        appContext.eventsSignal
+            .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseTodoDetailViewModel(result) = event { return result }; return nil }
+            .ignoreNil()
+            .promoteErrors(NSError)
+            .attemptMap { $0 }
+            .observeOn(UIScheduler())
+            .flatMapError { [unowned self] error -> SignalProducer<TodoDetailViewModel, NoError> in
+                self.presentError(error)
+                return .empty
+            }
+            .observeNext { [unowned self] todoDetailViewModel in
+                let viewController = TodoDetailViewController(viewModel: todoDetailViewModel, appContext: self.appContext)
+                self.presentViewController(viewController, animated: true, completion: nil)
+            }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -86,7 +103,7 @@ final class TodoListViewController: UITableViewController {
     }
     
     func doAdd() {
-        appContext.eventsObserver.sendNext(Event.RequestAddRandomTodoViewModel)
+        appContext.eventsObserver.sendNext(Event.RequestNewDetailViewModel)
     }
     
     func presentError(error: NSError) {

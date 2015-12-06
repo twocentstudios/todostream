@@ -25,6 +25,10 @@ enum Event {
     
     case RequestDeleteTodoViewModel(TodoViewModel)
     
-//    case ReqTodoDetailViewModel(TodoViewModel)
-//    case ResTodoDetailViewModel(Result<TodoDetailViewModel, NSError>)
+    case RequestNewDetailViewModel
+    case RequestTodoDetailViewModel(TodoViewModel)
+    case ResponseTodoDetailViewModel(Result<TodoDetailViewModel, NSError>)
+    
+    case RequestUpdateDetailViewModel(TodoDetailViewModel)
+    case ResponseUpdateDetailViewModel(Result<TodoDetailViewModel, NSError>)
 }

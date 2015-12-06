@@ -70,6 +70,18 @@ struct TodoListViewModel {
             }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
+        
+        /// .RequestNewDetailViewModel
+        appContext.eventsSignal
+            .filter { if case .RequestNewDetailViewModel = $0 { return true }; return false }
+            .map { _ in
+                let todo = Todo()
+                let todoDetailViewModel = TodoDetailViewModel(todo: todo)
+                return todoDetailViewModel
+            }
+            .map { Event.ResponseTodoDetailViewModel(Result(value: $0)) }
+            .observeOn(appContext.scheduler)
+            .observe(appContext.eventsObserver)
     }
 }
 
