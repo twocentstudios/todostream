@@ -7,19 +7,25 @@ import Foundation
 import ReactiveCocoa
 import Result
 
-struct TodoListViewModel {
+final class TodoListViewModel {
+    
+    var disposables = [Disposable?]()
+    
+    deinit {
+        dispose(disposables)
+    }
     
     init(appContext: AppContext) {
         
         /// .RequestTodoViewModels
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .filter { if case .RequestTodoViewModels = $0 { return true }; return false }
             .map { _ in Event.RequestReadTodos }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
         /// .ResponseTodos
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> Result<[Todo], NSError>? in if case let .ResponseTodos(result) = event { return result }; return nil }
             .ignoreNil()
             .map { result -> Result<[TodoViewModel], NSError> in
@@ -36,7 +42,7 @@ struct TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .ResponseTodo
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> Result<Todo, NSError>? in if case let .ResponseTodo(result) = event { return result }; return nil }
             .ignoreNil()
             .map { result -> Result<TodoViewModel, NSError> in
@@ -49,7 +55,7 @@ struct TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .RequestAddRandomTodoViewModel
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .filter { if case .RequestAddRandomTodoViewModel = $0 { return true }; return false }
             .map { _ in
                 var todo = Todo()
@@ -60,7 +66,7 @@ struct TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .RequestDeleteTodoViewModel
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> TodoViewModel? in if case let .RequestDeleteTodoViewModel(todoViewModel) = event { return todoViewModel }; return nil }
             .ignoreNil()
             .map {
@@ -71,9 +77,9 @@ struct TodoListViewModel {
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
-        /// .RequestNewDetailViewModel
-        appContext.eventsSignal
-            .filter { if case .RequestNewDetailViewModel = $0 { return true }; return false }
+        /// .RequestNewTodoDetailViewModel
+        disposables += appContext.eventsSignal
+            .filter { if case .RequestNewTodoDetailViewModel = $0 { return true }; return false }
             .map { _ in
                 let todo = Todo()
                 let todoDetailViewModel = TodoDetailViewModel(todo: todo)
@@ -83,8 +89,21 @@ struct TodoListViewModel {
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
+        /// .RequestTodoDetailViewModel
+        disposables += appContext.eventsSignal
+            .map { event -> TodoViewModel? in if case let .RequestTodoDetailViewModel(todoViewModel) = event { return todoViewModel }; return nil }
+            .ignoreNil()
+            .map {
+                let todo = $0.todo
+                let todoDetailViewModel = TodoDetailViewModel(todo: todo)
+                return todoDetailViewModel
+            }
+            .map { Event.ResponseTodoDetailViewModel(Result(value: $0)) }
+            .observeOn(appContext.scheduler)
+            .observe(appContext.eventsObserver)
+        
         /// .RequestUpdateDetailViewModel
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> TodoDetailViewModel? in if case let .RequestUpdateDetailViewModel(todoDetailViewModel) = event { return todoDetailViewModel }; return nil }
             .ignoreNil()
             .map { $0.validate() }
@@ -100,7 +119,7 @@ struct TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .ResponseUpdateDetailViewModel
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseUpdateDetailViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .map { $0.value }

@@ -6,7 +6,7 @@
 import Foundation
 import ReactiveCocoa
 
-struct AppContext {
+class AppContext {
     let (eventsSignal, eventsObserver) = Signal<Event, NoError>.pipe()
     
     // All events sent to eventsObserver that originate from eventsSignal *must* be

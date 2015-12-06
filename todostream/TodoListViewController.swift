@@ -13,11 +13,17 @@ final class TodoListViewController: UITableViewController {
     
     var viewModels = [TodoViewModel]()
     
+    var disposables = [Disposable?]()
+    
     init(appContext: AppContext) {
         self.appContext = appContext
         super.init(style: .Plain)
         
         self.title = "Todo List"
+    }
+    
+    deinit {
+        dispose(disposables)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -35,7 +41,7 @@ final class TodoListViewController: UITableViewController {
         tableView.dataSource = self
 
         /// .ResponseTodoViewModels
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> Result<[TodoViewModel], NSError>? in if case let .ResponseTodoViewModels(result) = event { return result }; return nil }
             .ignoreNil()
             .promoteErrors(NSError)
@@ -52,7 +58,7 @@ final class TodoListViewController: UITableViewController {
             }
         
         /// .ResponseTodoViewModel
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> Result<TodoViewModel, NSError>? in if case let .ResponseTodoViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .promoteErrors(NSError)
@@ -80,7 +86,7 @@ final class TodoListViewController: UITableViewController {
             }
         
         /// .ResponseDetailViewModel
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseTodoDetailViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .promoteErrors(NSError)
@@ -97,7 +103,7 @@ final class TodoListViewController: UITableViewController {
             }
         
         /// .ResponseUpdateDetailViewModel
-        appContext.eventsSignal
+        disposables += appContext.eventsSignal
             .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseUpdateDetailViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .map { $0.value }
@@ -118,7 +124,7 @@ final class TodoListViewController: UITableViewController {
     }
     
     func doAdd() {
-        appContext.eventsObserver.sendNext(Event.RequestNewDetailViewModel)
+        appContext.eventsObserver.sendNext(Event.RequestNewTodoDetailViewModel)
     }
     
     func presentError(error: NSError) {
@@ -147,7 +153,7 @@ final class TodoListViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let todoViewModel = viewModels[indexPath.row]
-        print(todoViewModel)
+        appContext.eventsObserver.sendNext(Event.RequestTodoDetailViewModel(todoViewModel))
         
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }

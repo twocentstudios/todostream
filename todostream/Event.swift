@@ -25,7 +25,7 @@ enum Event {
     
     case RequestDeleteTodoViewModel(TodoViewModel)
     
-    case RequestNewDetailViewModel
+    case RequestNewTodoDetailViewModel
     case RequestTodoDetailViewModel(TodoViewModel)
     case ResponseTodoDetailViewModel(Result<TodoDetailViewModel, NSError>)
     
