@@ -38,7 +38,7 @@ final class TodoListViewController: UITableViewController {
         appContext.eventsSignal
             .map { event -> Result<[TodoViewModel], NSError>? in
                 switch event {
-                case .ResTodoViewModels(let result): return result
+                case .ResponseTodoViewModels(let result): return result
                 default: return nil
                 }
             }
@@ -55,7 +55,7 @@ final class TodoListViewController: UITableViewController {
         appContext.eventsSignal
             .map { event -> Result<TodoViewModel, NSError>? in
                 switch event {
-                case .ResTodoViewModel(let result): return result
+                case .ResponseTodoViewModel(let result): return result
                 default: return nil
                 }
             }
@@ -79,11 +79,11 @@ final class TodoListViewController: UITableViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        appContext.eventsObserver.sendNext(Event.ReqTodoViewModels)
+        appContext.eventsObserver.sendNext(Event.RequestTodoViewModels)
     }
     
     func doAdd() {
-        appContext.eventsObserver.sendNext(Event.ReqAddRandomTodoViewModel)
+        appContext.eventsObserver.sendNext(Event.RequestAddRandomTodoViewModel)
     }
     
     // MARK: - UITableViewDataSource

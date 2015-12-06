@@ -11,23 +11,23 @@ struct TodoListViewModel {
     
     init(appContext: AppContext) {
         
-        /// .ReqTodoViewModels
+        /// .RequestTodoViewModels
         appContext.eventsSignal
             .filter { event -> Bool in
                 switch event {
-                case .ReqTodoViewModels: return true
+                case .RequestTodoViewModels: return true
                 default: return false
                 }
             }
-            .map { _ in Event.ReqReadTodos }
+            .map { _ in Event.RequestReadTodos }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
-        /// .ResTodos
+        /// .ResponseTodos
         appContext.eventsSignal
             .map { event -> Result<[Todo], NSError>? in
                 switch event {
-                case .ResTodos(let result): return result
+                case .ResponseTodos(let result): return result
                 default: return nil
                 }
             }
@@ -39,15 +39,15 @@ struct TodoListViewModel {
                     }
                     .mapError { _ in NSError.app() } // TODO: map model error to view model error
             }
-            .map { Event.ResTodoViewModels($0) }
+            .map { Event.ResponseTodoViewModels($0) }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
-        /// .ResTodo
+        /// .ResponseTodo
         appContext.eventsSignal
             .map { event -> Result<Todo, NSError>? in
                 switch event {
-                case .ResTodo(let result): return result
+                case .ResponseTodo(let result): return result
                 default: return nil
                 }
             }
@@ -57,22 +57,22 @@ struct TodoListViewModel {
                     .map { todo in TodoViewModel(todo: todo) }
                     .mapError { _ in NSError.app() } // TODO: map model error to view model error
             }
-            .map { Event.ResTodoViewModel($0) }
+            .map { Event.ResponseTodoViewModel($0) }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
-        /// .ReqAddRandomTodoViewModel
+        /// .RequestAddRandomTodoViewModel
         appContext.eventsSignal
             .filter { event -> Bool in
                 switch event {
-                case .ReqAddRandomTodoViewModel: return true
+                case .RequestAddRandomTodoViewModel: return true
                 default: return false
                 }
             }
             .map { _ in
                 var todo = Todo()
                 todo.title = todo.id.UUIDString
-                return Event.ReqWriteTodo(todo)
+                return Event.RequestWriteTodo(todo)
             }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)

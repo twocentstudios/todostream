@@ -33,24 +33,24 @@ struct PersistenceController {
     init(configuration: Realm.Configuration, appContext: AppContext) {
         self.configuration = configuration
         
-        /// .ReqReadTodos
+        /// .RequestReadTodos
         appContext.eventsSignal
             .filter {
                 switch $0 {
-                case .ReqReadTodos: return true
+                case .RequestReadTodos: return true
                 default: return false
                 }
             }
             .map { _ in self.database.map { $0.objects(TodoObject).decodeResults() }.mapError { _ in NSError.app() } }
-            .map { Event.ResTodos($0) }
+            .map { Event.ResponseTodos($0) }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
-        /// .ReqWriteTodo
+        /// .RequestWriteTodo
         appContext.eventsSignal
             .map { event -> Todo? in
                 switch event {
-                case .ReqWriteTodo(let todo): return todo
+                case .RequestWriteTodo(let todo): return todo
                 default: return nil
                 }
             }
@@ -63,7 +63,7 @@ struct PersistenceController {
                     }
                     .mapError { _ in NSError.app() }
             }
-            .map { Event.ResTodo($0) }
+            .map { Event.ResponseTodo($0) }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
     }

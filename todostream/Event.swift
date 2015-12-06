@@ -9,19 +9,19 @@ import Result
 enum Event {
     
     // Model
-    case ReqReadTodos
-    case ResTodos(Result<[Todo], NSError>)
+    case RequestReadTodos
+    case ResponseTodos(Result<[Todo], NSError>)
 
-    case ReqWriteTodo(Todo)    
-    case ResTodo(Result<Todo, NSError>)
+    case RequestWriteTodo(Todo)
+    case ResponseTodo(Result<Todo, NSError>)
     
     // ViewModel
-    case ReqTodoViewModels
-    case ResTodoViewModels(Result<[TodoViewModel], NSError>)
+    case RequestTodoViewModels
+    case ResponseTodoViewModels(Result<[TodoViewModel], NSError>)
     
-    case ResTodoViewModel(Result<TodoViewModel, NSError>)
+    case ResponseTodoViewModel(Result<TodoViewModel, NSError>)
     
-    case ReqAddRandomTodoViewModel
+    case RequestAddRandomTodoViewModel
     
 //    case ReqTodoDetailViewModel(TodoViewModel)
 //    case ResTodoDetailViewModel(Result<TodoDetailViewModel, NSError>)
