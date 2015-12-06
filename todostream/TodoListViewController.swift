@@ -108,7 +108,7 @@ final class TodoListViewController: UITableViewController {
     
     func presentError(error: NSError) {
         let alertController = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .Alert)
-        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Cancel) { _ in self.dismissViewControllerAnimated(true, completion: nil) })
+        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Cancel, handler: nil))
         self.presentViewController(alertController, animated: true, completion: nil)
     }
     
