@@ -26,6 +26,7 @@ struct TodoListViewModel {
                 return result
                     .map { todos in
                         todos
+                            .filter { !$0.deleted }
                             .map { (todo: Todo) -> TodoViewModel in TodoViewModel(todo: todo) }
                     }
                     .mapError { _ in NSError.app() } // TODO: map model error to view model error
@@ -53,6 +54,18 @@ struct TodoListViewModel {
             .map { _ in
                 var todo = Todo()
                 todo.title = todo.id.UUIDString
+                return Event.RequestWriteTodo(todo)
+            }
+            .observeOn(appContext.scheduler)
+            .observe(appContext.eventsObserver)
+        
+        /// .RequestDeleteTodoViewModel
+        appContext.eventsSignal
+            .map { event -> TodoViewModel? in if case let .RequestDeleteTodoViewModel(todoViewModel) = event { return todoViewModel }; return nil }
+            .ignoreNil()
+            .map {
+                var todo = $0.todo
+                todo.deleted = true
                 return Event.RequestWriteTodo(todo)
             }
             .observeOn(appContext.scheduler)

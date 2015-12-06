@@ -23,6 +23,8 @@ enum Event {
     
     case RequestAddRandomTodoViewModel
     
+    case RequestDeleteTodoViewModel(TodoViewModel)
+    
 //    case ReqTodoDetailViewModel(TodoViewModel)
 //    case ResTodoDetailViewModel(Result<TodoDetailViewModel, NSError>)
 }

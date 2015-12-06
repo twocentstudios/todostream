@@ -12,6 +12,7 @@ final class TodoObject: Object {
     dynamic var subtitle: String?
     dynamic var complete: Bool = false
     dynamic var priority: String?
+    dynamic var deleted: Bool = false
     
     override static func primaryKey() -> String? {
         return "id"
@@ -26,6 +27,7 @@ extension Todo: RealmEncodable {
         object.subtitle = self.subtitle
         object.complete = self.complete
         object.priority = self.priority.rawValue
+        object.deleted = self.deleted
         return object
     }
 }
@@ -37,7 +39,8 @@ extension TodoObject: RealmDecodable {
             title: self.title!,
             subtitle: self.subtitle!,
             complete: self.complete,
-            priority: TodoPriority(rawValue: self.priority!)!
+            priority: TodoPriority(rawValue: self.priority!)!,
+            deleted: self.deleted
         )
     }
 }

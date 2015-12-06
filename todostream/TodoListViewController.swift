@@ -65,10 +65,15 @@ final class TodoListViewController: UITableViewController {
             .observeOn(UIScheduler())
             .observeNext { [unowned self] todoViewModel in
                 if let index = self.viewModels.indexOf(todoViewModel) {
-                    // TODO: delete
-                    // replace
-                    self.viewModels[index] = todoViewModel
-                    self.tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: 0)], withRowAnimation: .Left)
+                    if (todoViewModel.deleted) {
+                        // delete
+                        self.viewModels.removeAtIndex(index)
+                        self.tableView.deleteRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: 0)], withRowAnimation: .Right)
+                    } else {
+                        // replace
+                        self.viewModels[index] = todoViewModel
+                        self.tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: 0)], withRowAnimation: .Left)
+                    }
                 } else {
                     self.viewModels.insert(todoViewModel, atIndex: 0)
                     self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Top)
@@ -105,9 +110,8 @@ final class TodoListViewController: UITableViewController {
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let vm = viewModels[indexPath.row]
-        print(vm)
-        // TODO: present
+        let todoViewModel = viewModels[indexPath.row]
+        appContext.eventsObserver.sendNext(Event.RequestDeleteTodoViewModel(todoViewModel))
         
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
