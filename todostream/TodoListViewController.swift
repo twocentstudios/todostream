@@ -13,17 +13,11 @@ final class TodoListViewController: UITableViewController {
     
     var viewModels = [TodoViewModel]()
     
-    var disposables = [Disposable?]()
-    
     init(appContext: AppContext) {
         self.appContext = appContext
         super.init(style: .Plain)
         
         self.title = "Todo List"
-    }
-    
-    deinit {
-        dispose(disposables)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -41,7 +35,8 @@ final class TodoListViewController: UITableViewController {
         tableView.dataSource = self
 
         /// .ResponseTodoViewModels
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Result<[TodoViewModel], NSError>? in if case let .ResponseTodoViewModels(result) = event { return result }; return nil }
             .ignoreNil()
             .promoteErrors(NSError)
@@ -58,7 +53,8 @@ final class TodoListViewController: UITableViewController {
             }
         
         /// .ResponseTodoViewModel
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Result<TodoViewModel, NSError>? in if case let .ResponseTodoViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .promoteErrors(NSError)
@@ -86,7 +82,8 @@ final class TodoListViewController: UITableViewController {
             }
         
         /// .ResponseDetailViewModel
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseTodoDetailViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .promoteErrors(NSError)
@@ -103,7 +100,8 @@ final class TodoListViewController: UITableViewController {
             }
         
         /// .ResponseUpdateDetailViewModel
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseUpdateDetailViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .map { $0.value }

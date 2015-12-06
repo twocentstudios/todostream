@@ -13,18 +13,12 @@ final class TodoDetailViewController: UITableViewController {
     
     var viewModel: TodoDetailViewModel
     
-    var disposables = [Disposable?]()
-    
     init(viewModel: TodoDetailViewModel, appContext: AppContext) {
         self.viewModel = viewModel
         self.appContext = appContext
         super.init(style: .Grouped)
         
         self.title = "Update Item"
-    }
-    
-    deinit {
-        dispose(disposables)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -42,7 +36,8 @@ final class TodoDetailViewController: UITableViewController {
         tableView.delegate = self
         tableView.dataSource = self
         
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseUpdateDetailViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .map { $0.error }

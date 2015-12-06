@@ -26,8 +26,6 @@ enum PersistenceError: ErrorType {
 final class PersistenceController {
     let configuration: Realm.Configuration
     
-    var disposables = [Disposable?]()
-    
     var database: Result<Realm, PersistenceError> {
         return Realm.result(configuration)
     }
@@ -36,7 +34,7 @@ final class PersistenceController {
         self.configuration = configuration
         
         /// .RequestReadTodos
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
             .filter { if case .RequestReadTodos = $0 { return true }; return false }
             .map { _ in self.database.map { $0.objects(TodoObject).sorted("createdAt", ascending: false).decodeResults() }.mapError { _ in NSError.app() } }
             .map { Event.ResponseTodos($0) }
@@ -44,7 +42,7 @@ final class PersistenceController {
             .observe(appContext.eventsObserver)
         
         /// .RequestWriteTodo
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
             .map { event -> Todo? in if case let .RequestWriteTodo(todo) = event { return todo }; return nil }
             .ignoreNil()
             .map { $0.realmObject }

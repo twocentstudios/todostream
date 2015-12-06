@@ -5,11 +5,20 @@
 
 import ReactiveCocoa
 
-public func +=<Element>(inout lhs: [Element], rhs: Element) {
-    return lhs.append(rhs)
-}
+extension SignalType {
+    /// Returns a signal that forward events until the supplied block returns nil.
+    @warn_unused_result(message="Did you forget to call `observe` on the signal?")
+    public func takeUntilNil<T>(block: () -> T?) -> Signal<Value, Error> {
+        return Signal { observer in
+            return self.observe { event in
+                let blockValue = block()
 
-// TODO: turn this into an extension on SequenceType
-func dispose(disposables: [Disposable?]) {
-    disposables.forEach { $0?.dispose() }
+                if (blockValue == nil) {
+                    observer.sendCompleted()
+                } else {
+                    observer.action(event)
+                }
+            }
+        }
+    }
 }

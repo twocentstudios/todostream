@@ -9,23 +9,19 @@ import Result
 
 final class TodoListViewModel {
     
-    var disposables = [Disposable?]()
-    
-    deinit {
-        dispose(disposables)
-    }
-    
     init(appContext: AppContext) {
         
         /// .RequestTodoViewModels
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .filter { if case .RequestTodoViewModels = $0 { return true }; return false }
             .map { _ in Event.RequestReadTodos }
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
         
         /// .ResponseTodos
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Result<[Todo], NSError>? in if case let .ResponseTodos(result) = event { return result }; return nil }
             .ignoreNil()
             .map { result -> Result<[TodoViewModel], NSError> in
@@ -42,7 +38,8 @@ final class TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .ResponseTodo
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Result<Todo, NSError>? in if case let .ResponseTodo(result) = event { return result }; return nil }
             .ignoreNil()
             .map { result -> Result<TodoViewModel, NSError> in
@@ -66,7 +63,8 @@ final class TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .RequestDeleteTodoViewModel
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> TodoViewModel? in if case let .RequestDeleteTodoViewModel(todoViewModel) = event { return todoViewModel }; return nil }
             .ignoreNil()
             .map {
@@ -78,7 +76,8 @@ final class TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .RequestNewTodoDetailViewModel
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .filter { if case .RequestNewTodoDetailViewModel = $0 { return true }; return false }
             .map { _ in
                 let todo = Todo()
@@ -90,7 +89,8 @@ final class TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .RequestTodoDetailViewModel
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> TodoViewModel? in if case let .RequestTodoDetailViewModel(todoViewModel) = event { return todoViewModel }; return nil }
             .ignoreNil()
             .map {
@@ -103,7 +103,8 @@ final class TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .RequestUpdateDetailViewModel
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> TodoDetailViewModel? in if case let .RequestUpdateDetailViewModel(todoDetailViewModel) = event { return todoDetailViewModel }; return nil }
             .ignoreNil()
             .map { $0.validate() }
@@ -119,7 +120,8 @@ final class TodoListViewModel {
             .observe(appContext.eventsObserver)
         
         /// .ResponseUpdateDetailViewModel
-        disposables += appContext.eventsSignal
+        appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Result<TodoDetailViewModel, NSError>? in if case let .ResponseUpdateDetailViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .map { $0.value }
