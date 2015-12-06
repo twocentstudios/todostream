@@ -35,12 +35,7 @@ struct PersistenceController {
         
         /// .RequestReadTodos
         appContext.eventsSignal
-            .filter {
-                switch $0 {
-                case .RequestReadTodos: return true
-                default: return false
-                }
-            }
+            .filter { if case .RequestReadTodos = $0 { return true }; return false }
             .map { _ in self.database.map { $0.objects(TodoObject).decodeResults() }.mapError { _ in NSError.app() } }
             .map { Event.ResponseTodos($0) }
             .observeOn(appContext.scheduler)
@@ -48,12 +43,7 @@ struct PersistenceController {
         
         /// .RequestWriteTodo
         appContext.eventsSignal
-            .map { event -> Todo? in
-                switch event {
-                case .RequestWriteTodo(let todo): return todo
-                default: return nil
-                }
-            }
+            .map { event -> Todo? in if case let .RequestWriteTodo(todo) = event { return todo }; return nil }
             .ignoreNil()
             .map { $0.realmObject }
             .map { todoObject in

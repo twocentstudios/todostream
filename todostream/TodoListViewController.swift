@@ -36,12 +36,7 @@ final class TodoListViewController: UITableViewController {
 
         /// .ResTodos
         appContext.eventsSignal
-            .map { event -> Result<[TodoViewModel], NSError>? in
-                switch event {
-                case .ResponseTodoViewModels(let result): return result
-                default: return nil
-                }
-            }
+            .map { event -> Result<[TodoViewModel], NSError>? in if case let .ResponseTodoViewModels(result) = event { return result }; return nil }
             .ignoreNil()
             .map { $0.value }
             .ignoreNil()
@@ -53,12 +48,7 @@ final class TodoListViewController: UITableViewController {
             }
         
         appContext.eventsSignal
-            .map { event -> Result<TodoViewModel, NSError>? in
-                switch event {
-                case .ResponseTodoViewModel(let result): return result
-                default: return nil
-                }
-            }
+            .map { event -> Result<TodoViewModel, NSError>? in if case let .ResponseTodoViewModel(result) = event { return result }; return nil }
             .ignoreNil()
             .map { $0.value }
             .ignoreNil()
