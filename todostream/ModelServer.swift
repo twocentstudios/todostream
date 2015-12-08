@@ -18,7 +18,7 @@ protocol RealmDecodable {
     var domainObject: DomainObjectType { get }
 }
 
-final class PersistenceController {
+final class ModelServer {
     let configuration: Realm.Configuration
     
     var database: Result<Realm, NSError> {

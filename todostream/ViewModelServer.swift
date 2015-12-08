@@ -7,7 +7,7 @@ import Foundation
 import ReactiveCocoa
 import Result
 
-final class TodoListViewModel {
+final class ViewModelServer {
     
     init(appContext: AppContext) {
         
@@ -135,34 +135,4 @@ final class TodoListViewModel {
             .observeOn(appContext.scheduler)
             .observe(appContext.eventsObserver)
     }
-}
-
-struct TodoViewModel {
-    let todo: Todo
-    
-    let title: String
-    let subtitle: String
-    let complete: Bool
-    let deleted: Bool
-    
-    var completeActionTitle: String {
-        return complete ? "Uncomplete" : "Complete"
-    }
-    
-    init(todo: Todo) {
-        self.todo = todo
-        
-        let priority = todo.priority.rawValue.uppercaseString
-        
-        self.title = todo.title
-        self.subtitle = "Priority: \(priority)"
-        self.complete = todo.complete
-        self.deleted = todo.deleted
-    }
-}
-
-// TODO: change this to isEqualIdentity
-extension TodoViewModel: Equatable {}
-func ==(lhs: TodoViewModel, rhs: TodoViewModel) -> Bool {
-    return lhs.todo.id == rhs.todo.id
 }
