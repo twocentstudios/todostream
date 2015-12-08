@@ -30,6 +30,7 @@ final class PersistenceController {
         
         /// .RequestReadTodos
         appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .filter { if case .RequestReadTodos = $0 { return true }; return false }
             .map { _ in self.database.map { $0.objects(TodoObject).sorted("createdAt", ascending: false).decodeResults() }.mapError { $0 } }
             .map { Event.ResponseTodos($0) }
@@ -38,6 +39,7 @@ final class PersistenceController {
         
         /// .RequestWriteTodo
         appContext.eventsSignal
+            .takeUntilNil { [weak self] in self }
             .map { event -> Todo? in if case let .RequestWriteTodo(todo) = event { return todo }; return nil }
             .ignoreNil()
             .map { $0.realmObject }
