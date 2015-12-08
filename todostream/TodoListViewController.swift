@@ -11,9 +11,10 @@ final class TodoListViewController: UITableViewController {
     
     let appContext: AppContext
     
-    var viewModels = [TodoViewModel]()
+    var viewModel: TodoListViewModel
     
-    init(appContext: AppContext) {
+    init(viewModel: TodoListViewModel, appContext: AppContext) {
+        self.viewModel = viewModel
         self.appContext = appContext
         super.init(style: .Plain)
         
@@ -47,9 +48,13 @@ final class TodoListViewController: UITableViewController {
                 return .empty
             }
             .observeNext { [unowned self] todoViewModels in
-                if (self.viewModels == todoViewModels) { return }
-                self.viewModels = todoViewModels
-                self.tableView.reloadData()
+                let change = self.viewModel.incorporateTodoViewModels(todoViewModels)
+                switch change {
+                case .Reload:
+                    self.tableView.reloadData()
+                case .NoOp:
+                    break
+                }
             }
         
         /// .ResponseTodoViewModel
@@ -65,19 +70,16 @@ final class TodoListViewController: UITableViewController {
                 return .empty
             }
             .observeNext { [unowned self] todoViewModel in
-                if let index = self.viewModels.indexOf(todoViewModel) {
-                    if (todoViewModel.deleted) {
-                        // delete
-                        self.viewModels.removeAtIndex(index)
-                        self.tableView.deleteRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: 0)], withRowAnimation: .Right)
-                    } else {
-                        // replace
-                        self.viewModels[index] = todoViewModel
-                        self.tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: index, inSection: 0)], withRowAnimation: .Left)
-                    }
-                } else {
-                    self.viewModels.insert(todoViewModel, atIndex: 0)
-                    self.tableView.insertRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 0)], withRowAnimation: .Top)
+                let change = self.viewModel.incorporateTodoViewModel(todoViewModel)
+                switch change {
+                case let .Insert(indexPath):
+                    self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Top)
+                case let .Delete(indexPath):
+                    self.tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Left)
+                case let .Reload(indexPath):
+                    self.tableView.reloadRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+                case .NoOp:
+                    break
                 }
             }
         
@@ -134,7 +136,7 @@ final class TodoListViewController: UITableViewController {
     // MARK: - UITableViewDataSource
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModels.count
+        return viewModel.numberOfRowsInSection(section)
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -146,26 +148,26 @@ final class TodoListViewController: UITableViewController {
     
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         let cell = cell as! TodoCell
-        cell.viewModel = viewModels[indexPath.row]
+        cell.viewModel = viewModel.viewModelAtIndexPath(indexPath)
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let todoViewModel = viewModels[indexPath.row]
+        let todoViewModel = viewModel.viewModelAtIndexPath(indexPath)
         appContext.eventsObserver.sendNext(Event.RequestTodoDetailViewModel(todoViewModel))
         
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
     }
     
     override func tableView(tableView: UITableView, editActionsForRowAtIndexPath indexPath: NSIndexPath) -> [UITableViewRowAction]? {
-        let todoViewModel = self.viewModels[indexPath.row]
+        let todoViewModel = viewModel.viewModelAtIndexPath(indexPath)
         
         let toggleCompleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.Normal, title: todoViewModel.completeActionTitle) { [unowned self] (action, path) -> Void in
-            let todoViewModel = self.viewModels[path.row]
+            let todoViewModel = self.viewModel.viewModelAtIndexPath(path)
             self.appContext.eventsObserver.sendNext(Event.RequestToggleCompleteTodoViewModel(todoViewModel))
         }
         
         let deleteAction = UITableViewRowAction(style: UITableViewRowActionStyle.Destructive, title: "Delete") { [unowned self] (action, path) -> Void in
-            let todoViewModel = self.viewModels[path.row]
+            let todoViewModel = self.viewModel.viewModelAtIndexPath(path)
             self.appContext.eventsObserver.sendNext(Event.RequestDeleteTodoViewModel(todoViewModel))
         }
         

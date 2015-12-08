@@ -21,7 +21,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.modelServer = ModelServer(configuration: Realm.Configuration.defaultConfiguration, appContext: appContext)
         self.viewModelServer = ViewModelServer(appContext: appContext)
         
-        let todoListViewController = TodoListViewController(appContext: appContext)
+        let todoListViewModel = TodoListViewModel()
+        let todoListViewController = TodoListViewController(viewModel: todoListViewModel, appContext: appContext)
         let navigationController = UINavigationController(rootViewController: todoListViewController)
         
         self.window = UIWindow(frame: UIScreen.mainScreen().bounds)
