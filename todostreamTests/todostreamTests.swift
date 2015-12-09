@@ -8,29 +8,82 @@
 
 import XCTest
 @testable import todostream
+import Result
+import ReactiveCocoa
+import RealmSwift
 
 class todostreamTests: XCTestCase {
     
+    var appContext: AppContext!
+    var viewModelServer: ViewModelServer!
+    var modelServer: ModelServer!
+    
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        appContext = AppContext()
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-    
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measureBlock {
-            // Put the code you want to measure the time of here.
+    func testRequestNewTodoDetailViewModel() {
+        viewModelServer = ViewModelServer(appContext: appContext)
+        let event = Event.RequestNewTodoDetailViewModel
+        
+        let expectation = expectationWithDescription("")
+        appContext.eventsSignal.observeNext { (e: todostream.Event) in
+            if case let todostream.Event.ResponseTodoDetailViewModel(result) = e {
+                XCTAssert(result.value != nil)
+                expectation.fulfill()
+            }
         }
+        
+        appContext.eventsObserver.sendNext(event)
+        
+        waitForExpectationsWithTimeout(1.0, handler: nil)
     }
     
+    func testRequestToggleCompleteTodoViewModel() {
+        viewModelServer = ViewModelServer(appContext: appContext)
+        let todo = Todo()
+        XCTAssert(todo.complete == false)
+        let todoViewModel = TodoViewModel(todo: todo)
+        let event = Event.RequestToggleCompleteTodoViewModel(todoViewModel)
+        
+        let expectation = expectationWithDescription("")
+        appContext.eventsSignal.observeNext { (e: todostream.Event) in
+            if case let todostream.Event.RequestWriteTodo(model) = e {
+                XCTAssert(model.complete == true)
+                expectation.fulfill()
+            }
+        }
+        
+        appContext.eventsObserver.sendNext(event)
+        
+        waitForExpectationsWithTimeout(1.0, handler: nil)
+    }
+    
+    func testIntegrationRequestToggleCompleteTodoViewModel() {
+        viewModelServer = ViewModelServer(appContext: appContext)
+        modelServer = ModelServer(configuration: Realm.Configuration.defaultConfiguration, appContext: appContext)
+        let todo = Todo()
+        XCTAssert(todo.complete == false)
+        let todoViewModel = TodoViewModel(todo: todo)
+        let event = Event.RequestToggleCompleteTodoViewModel(todoViewModel)
+        
+        let expectation = expectationWithDescription("")
+        appContext.eventsSignal.observeNext { (e: todostream.Event) in
+            if case let todostream.Event.ResponseTodoViewModel(result) = e {
+                let model = result.value!.todo
+                XCTAssert(model.id == todo.id)
+                XCTAssert(model.complete == true)
+                expectation.fulfill()
+            }
+        }
+        
+        appContext.eventsObserver.sendNext(event)
+        
+        waitForExpectationsWithTimeout(1.0, handler: nil)
+    }
 }
