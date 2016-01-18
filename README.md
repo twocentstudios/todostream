@@ -6,7 +6,7 @@ todostream is an example todo list iOS app with an experimental architecture. It
 
 1. Clone the repo. `$ git clone git://github.com/twocentstudios/todostream.git`.
 1. Install the pods. `$ pod install`.
-1. Open `tinykittenstv.xcworkspace`.
+1. Open `todostream.xcworkspace`.
 1. Build!
 
 ## Technologies
